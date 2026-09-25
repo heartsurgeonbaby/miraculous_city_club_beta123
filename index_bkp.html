@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Miraculous City Club</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#09090c;color:#fff;font:14px Arial,sans-serif}
+header{position:sticky;top:0;z-index:5;padding:14px 18px;background:#d71936;
+display:flex;align-items:center;justify-content:space-between;box-shadow:0 3px 12px #000}
+h1{margin:0;font-size:20px}
+nav button,.ctrl button{background:#292932;color:#fff;border:1px solid #444;
+border-radius:7px;padding:8px 12px;cursor:pointer}
+nav button:hover,.ctrl button:hover{background:#e31b35}
+main{max-width:1100px;margin:auto;padding:20px}
+section{margin-bottom:30px;background:#15151b;border:1px solid #303039;
+border-radius:12px;padding:16px}
+h2{margin-top:0;color:#ff526b}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px}
+.card{background:#0e0e12;border-radius:10px;padding:10px;border:1px solid #292932}
+.media{overflow:auto;background:#000;border-radius:7px;max-height:650px;
+display:flex;justify-content:center;align-items:center}
+#comic{width:auto;max-width:none;max-height:none;transform-origin:center;
+cursor:grab;user-select:none}
+#comic.drag{cursor:grabbing}
+video{display:block;width:100%;max-height:420px;background:#000;border-radius:7px}
+.ctrl{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.ctrl button.active{background:#e31b35}
+.ctrl span{padding:8px;color:#bbb}
+.ai{border-left:4px solid #e31b35;padding:12px;background:#211117;
+border-radius:6px;line-height:1.5}
+footer{text-align:center;color:#777;padding:20px}
+@media(max-width:600px){
+ main{padding:10px}
+ header{padding:11px}
+ .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🐞 Miraculous City Club</h1>
+<nav>
+<button onclick="go('comicSection')">Comic</button>
+<button onclick="go('videos')">Videos</button>
+<button onclick="go('ai')">AI Idea</button>
+</nav>
+</header>
+
+<main>
+
+<!-- ================= COMIC ================= -->
+
+<section id="comicSection">
+<h2>📖 Comic Page</h2>
+
+<div class="card">
+
+<div class="media" id="comicBox">
+<img id="comic" src="1img001.jpg" alt="Miraculous comic page">
+</div>
+
+<div class="ctrl">
+<button onclick="comicZoom(1.2)">＋ Zoom</button>
+<button onclick="comicZoom(.83)">− Zoom</button>
+<button onclick="resetComic()">Reset</button>
+<button onclick="comicRotate(-90)">↶</button>
+<button onclick="comicRotate(90)">↷</button>
+<span id="zoomText">100%</span>
+</div>
+
+<p class="note">
+Mouse wheel = zoom • Drag = pan • Reset returns to normal view
+</p>
+
+</div>
+</section>
+
+
+<!-- ================= VIDEOS ================= -->
+
+<section id="videos">
+<h2>🎬 City Club Videos</h2>
+
+<div class="ctrl">
+<button id="cycleBtn" onclick="toggleCycle()">▶ Start Cycle</button>
+<button onclick="stopCycle()">■ Stop Cycle</button>
+<span id="cycleText">Cycle off</span>
+</div>
+
+<div class="grid">
+
+<div class="card">
+<video class="clubVideo" controls preload="metadata">
+<source src="2026-09-08 08-35-06.mp4" type="video/mp4">
+</video>
+</div>
+
+<div class="card">
+<video class="clubVideo" controls preload="metadata">
+<source src="2026-09-10 17-38-22.mp4" type="video/mp4">
+</video>
+</div>
+
+<div class="card">
+<video class="clubVideo" controls preload="metadata">
+<source src="2026-09-10 19-08-32.mp4" type="video/mp4">
+</video>
+</div>
+
+<div class="card">
+<video class="clubVideo" controls preload="metadata">
+<source src="2026-09-25 15-29-09.mp4" type="video/mp4">
+</video>
+</div>
+
+<div class="card">
+<video class="clubVideo" controls preload="metadata">
+<source src="2026-09-25 17-05-17.mp4" type="video/mp4">
+</video>
+</div>
+
+</div>
+
+<p class="note">
+Cycle mode plays the videos one after another. When one finishes,
+the next video starts automatically.
+</p>
+
+</section>
+
+
+<!-- ================= AI ================= -->
+
+<section id="ai">
+<h2>🤖 AI Crossover Idea</h2>
+
+<div class="ai">
+<b>AI opinion:</b> A crossover putting Sonic characters and Miraculous
+characters into a GTA-style open world could be an extremely chaotic
+fictional game concept. Sonic characters could use speed and movement
+while Miraculous characters bring their powers and gadgets into the
+same city.
+
+<br><br>
+
+You could have different factions, missions, races and exaggerated
+fictional battles, with matchups changing depending on each character's
+abilities.
+</div>
+</section>
+
+</main>
+
+<footer>
+Miraculous City Club • Comic & Video Hub
+</footer>
+
+
+<script>
+
+/* ================= COMIC ZOOM + PAN ================= */
+
+const comic=document.getElementById("comic");
+const box=document.getElementById("comicBox");
+
+let zoom=1, rotation=0;
+let x=0,y=0;
+let dragging=false;
+let sx=0,sy=0;
+
+function updateComic(){
+ comic.style.transform=
+ `translate(${x}px,${y}px) scale(${zoom}) rotate(${rotation}deg)`;
+ document.getElementById("zoomText").textContent=
+ Math.round(zoom*100)+"%";
+}
+
+function comicZoom(amount){
+ zoom=Math.max(.5,Math.min(5,zoom*amount));
+ updateComic();
+}
+
+function resetComic(){
+ zoom=1;
+ x=0;
+ y=0;
+ rotation=0;
+ updateComic();
+}
+
+function comicRotate(amount){
+ rotation+=amount;
+ updateComic();
+}
+
+/* Mouse wheel zoom */
+
+box.addEventListener("wheel",e=>{
+ e.preventDefault();
+ comicZoom(e.deltaY<0?1.12:.89);
+},{passive:false});
+
+/* Mouse pan */
+
+comic.addEventListener("mousedown",e=>{
+ if(zoom<=1)return;
+
+ dragging=true;
+ comic.classList.add("drag");
+
+ sx=e.clientX-x;
+ sy=e.clientY-y;
+
+ e.preventDefault();
+});
+
+window.addEventListener("mousemove",e=>{
+ if(!dragging)return;
+
+ x=e.clientX-sx;
+ y=e.clientY-sy;
+
+ updateComic();
+});
+
+window.addEventListener("mouseup",()=>{
+ dragging=false;
+ comic.classList.remove("drag");
+});
+
+
+/* Touch pan */
+
+let tx=0,ty=0;
+
+comic.addEventListener("touchstart",e=>{
+ if(e.touches.length!==1)return;
+
+ tx=e.touches[0].clientX-x;
+ ty=e.touches[0].clientY-y;
+},{passive:true});
+
+comic.addEventListener("touchmove",e=>{
+ if(zoom<=1||e.touches.length!==1)return;
+
+ x=e.touches[0].clientX-tx;
+ y=e.touches[0].clientY-ty;
+
+ updateComic();
+},{passive:true});
+
+
+/* ================= VIDEO CYCLE ================= */
+
+const videos=[...document.querySelectorAll(".clubVideo")];
+
+let cycling=false;
+let currentVideo=0;
+
+function toggleCycle(){
+
+ if(cycling){
+  stopCycle();
+  return;
+ }
+
+ cycling=true;
+ currentVideo=0;
+
+ document.getElementById("cycleBtn").textContent=
+ "⏸ Stop Cycle";
+
+ document.getElementById("cycleText").textContent=
+ "Cycle running";
+
+ playCurrent();
+
+}
+
+function playCurrent(){
+
+ if(!cycling)return;
+
+ videos.forEach((v,i)=>{
+  if(i!==currentVideo){
+   v.pause();
+  }
+ });
+
+ const v=videos[currentVideo];
+
+ v.currentTime=0;
+ v.play().catch(()=>{});
+
+ v.onended=nextVideo;
+}
+
+function nextVideo(){
+
+ if(!cycling)return;
+
+ currentVideo++;
+
+ if(currentVideo>=videos.length)
+  currentVideo=0;
+
+ playCurrent();
+}
+
+function stopCycle(){
+
+ cycling=false;
+
+ videos.forEach(v=>v.pause());
+
+ document.getElementById("cycleBtn").textContent=
+ "▶ Start Cycle";
+
+ document.getElementById("cycleText").textContent=
+ "Cycle off";
+}
+
+
+/* ================= NAVIGATION ================= */
+
+function go(id){
+ document.getElementById(id).scrollIntoView({
+  behavior:"smooth"
+ });
+}
+
+</script>
+
+</body>
+</html>
